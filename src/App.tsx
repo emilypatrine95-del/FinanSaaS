@@ -23,7 +23,7 @@ import { Settings } from './components/Settings';
 import { TransactionForm } from './components/TransactionForm';
 import { UserProfile, Transaction, Person, Category, Goal } from './types';
 import { motion, AnimatePresence } from 'motion/react';
-import { AlertCircle, RefreshCcw } from 'lucide-react';
+import { AlertCircle, RefreshCcw, Download, X } from 'lucide-react';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
   constructor(props: any) {
@@ -78,6 +78,32 @@ export default function App() {
   const [people, setPeople] = React.useState<Person[]>([]);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [goals, setGoals] = React.useState<Goal[]>([]);
+  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBanner(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setShowInstallBanner(false);
+    }
+  };
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -188,6 +214,8 @@ export default function App() {
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
           onLogout={handleLogout} 
+          onInstall={handleInstallClick}
+          showInstall={!!deferredPrompt}
         />
 
         <main className="lg:ml-64 min-h-screen p-4 lg:p-8">
@@ -212,6 +240,43 @@ export default function App() {
             people={people}
           />
         )}
+
+        <AnimatePresence>
+          {showInstallBanner && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md"
+            >
+              <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-2xl flex items-center justify-between gap-4 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <Download size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">Instalar FinanSaaS</p>
+                    <p className="text-xs text-slate-400">Acesse mais rápido pelo seu celular.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={handleInstallClick}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Instalar
+                  </button>
+                  <button 
+                    onClick={() => setShowInstallBanner(false)}
+                    className="p-2 text-slate-400 hover:text-white"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ErrorBoundary>
   );

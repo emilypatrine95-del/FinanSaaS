@@ -1,1 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+  }
+}
+
+@media print {
+  .lg\:ml-64 {
+    margin-left: 0 !important;
+  }
+  
+  aside, 
+  nav, 
+  button, 
+  select,
+  .no-print {
+    display: none !important;
+  }
+
+  .bg-slate-50 {
+    background-color: white !important;
+  }
+
+  .rounded-3xl, 
+  .rounded-\[2\.5rem\],
+  .rounded-2xl {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  h2, h3 {
+    color: black !important;
+  }
+}
