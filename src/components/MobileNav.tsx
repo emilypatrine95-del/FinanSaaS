@@ -4,10 +4,12 @@ import {
   ArrowLeftRight, 
   BarChart3, 
   BrainCircuit, 
-  Settings 
+  Settings,
+  User
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { UserProfile } from '../types';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,9 +18,10 @@ function cn(...inputs: ClassValue[]) {
 interface MobileNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  userProfile: UserProfile | null;
 }
 
-export function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
+export function MobileNav({ activeTab, setActiveTab, userProfile }: MobileNavProps) {
   const items = [
     { id: 'dashboard', label: 'Início', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transações', icon: ArrowLeftRight },
@@ -40,10 +43,21 @@ export function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
             )}
           >
             <div className={cn(
-              "p-2 rounded-xl transition-all",
+              "p-2 rounded-xl transition-all flex items-center justify-center overflow-hidden",
               activeTab === item.id ? "bg-emerald-50" : "bg-transparent"
             )}>
-              <item.icon size={24} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+              {item.id === 'settings' && userProfile?.photoURL ? (
+                <div className="w-6 h-6 rounded-lg overflow-hidden border border-slate-200">
+                  <img 
+                    src={userProfile.photoURL} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              ) : (
+                <item.icon size={24} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+              )}
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
           </button>

@@ -226,6 +226,7 @@ export default function App() {
           onLogout={handleLogout} 
           onInstall={handleInstallClick}
           showInstall={!!deferredPrompt}
+          userProfile={userProfile}
         />
 
         <main className="lg:ml-64 min-h-screen p-4 lg:p-8 pb-24 lg:pb-8">
@@ -244,7 +245,7 @@ export default function App() {
           </div>
         </main>
 
-        <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} userProfile={userProfile} />
 
         {showTransactionForm && (
           <TransactionForm 

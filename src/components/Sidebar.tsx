@@ -11,14 +11,17 @@ import {
   LogOut,
   Menu,
   X,
-  Download
+  Download,
+  User
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { UserProfile } from '../types';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 
 interface SidebarProps {
   activeTab: string;
@@ -26,9 +29,10 @@ interface SidebarProps {
   onLogout: () => void;
   onInstall?: () => void;
   showInstall?: boolean;
+  userProfile: UserProfile | null;
 }
 
-export function Sidebar({ activeTab, setActiveTab, onLogout, onInstall, showInstall }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, onLogout, onInstall, showInstall, userProfile }: SidebarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const mainItems = [
@@ -138,6 +142,26 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, onInstall, showInst
           </div>
 
           <div className="mt-auto p-8 space-y-4">
+            {userProfile && (
+              <div className="flex items-center gap-3 px-4 py-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                  {userProfile.photoURL ? (
+                    <img 
+                      src={userProfile.photoURL} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <User size={20} className="text-slate-400" />
+                  )}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-bold text-slate-900 truncate">{userProfile.fullName || 'Usuário'}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{userProfile.email}</p>
+                </div>
+              </div>
+            )}
             {showInstall && (
               <button 
                 onClick={onInstall}

@@ -65,8 +65,8 @@ export function Reports({ transactions }: ReportsProps) {
       );
       return {
         name: format(date, 'MMM', { locale: ptBR }),
-        income: mTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0),
-        expense: mTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
+        Entradas: mTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0),
+        Saídas: mTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
       };
     });
   }, [transactions, period]);
@@ -118,9 +118,9 @@ export function Reports({ transactions }: ReportsProps) {
       head: [['Mês', 'Entradas', 'Saídas', 'Resultado']],
       body: monthlyData.map(m => [
         m.name, 
-        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.income),
-        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.expense),
-        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.income - m.expense)
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.Entradas),
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.Saídas),
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(m.Entradas - m.Saídas)
       ]),
       startY: (doc as any).lastAutoTable.finalY + 20,
       theme: 'grid',
@@ -262,8 +262,8 @@ export function Reports({ transactions }: ReportsProps) {
                   iconType="circle"
                   formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">{value}</span>}
                 />
-                <Bar dataKey="income" name="Entradas" fill="#10b981" radius={[12, 12, 0, 0]} />
-                <Bar dataKey="expense" name="Saídas" fill="#f43f5e" radius={[12, 12, 0, 0]} />
+                <Bar dataKey="Entradas" name="Entradas" fill="#10b981" radius={[12, 12, 0, 0]} />
+                <Bar dataKey="Saídas" name="Saídas" fill="#f43f5e" radius={[12, 12, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
