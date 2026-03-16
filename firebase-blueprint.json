@@ -1,0 +1,104 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "company": { "type": "string" },
+        "currency": { "type": "string", "enum": ["BRL", "USD", "EUR"] },
+        "timezone": { "type": "string" },
+        "language": { "type": "string", "enum": ["pt-BR", "en-US"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial transaction (income or expense)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "subcategory": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "paymentMethod": { "type": "string" },
+        "personId": { "type": "string" },
+        "notes": { "type": "string" },
+        "attachmentUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "type", "amount", "category", "date"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Financial category",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "icon": { "type": "string" },
+        "color": { "type": "string" }
+      },
+      "required": ["uid", "name", "type"]
+    },
+    "Person": {
+      "title": "Person",
+      "description": "Contact associated with transactions",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "type": { "type": "string", "enum": ["client", "supplier", "other"] },
+        "notes": { "type": "string" }
+      },
+      "required": ["uid", "name", "type"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "Financial goal",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "title": { "type": "string" },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "deadline": { "type": "string", "format": "date-time" },
+        "category": { "type": "string" }
+      },
+      "required": ["uid", "title", "targetAmount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "All financial transactions"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Custom user categories"
+    },
+    "/people/{personId}": {
+      "schema": "Person",
+      "description": "Contacts and entities"
+    },
+    "/goals/{goalId}": {
+      "schema": "Goal",
+      "description": "Financial goals and progress"
+    }
+  }
+}
