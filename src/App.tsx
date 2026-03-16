@@ -20,6 +20,7 @@ import { Categories } from './components/Categories';
 import { Goals } from './components/Goals';
 import { AIAssistant } from './components/AIAssistant';
 import { Settings } from './components/Settings';
+import { MobileNav } from './components/MobileNav';
 import { TransactionForm } from './components/TransactionForm';
 import { UserProfile, Transaction, Person, Category, Goal } from './types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -218,7 +219,7 @@ export default function App() {
           showInstall={!!deferredPrompt}
         />
 
-        <main className="lg:ml-64 min-h-screen p-4 lg:p-8">
+        <main className="lg:ml-64 min-h-screen p-4 lg:p-8 pb-24 lg:pb-8">
           <div className="max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
@@ -233,6 +234,8 @@ export default function App() {
             </AnimatePresence>
           </div>
         </main>
+
+        <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {showTransactionForm && (
           <TransactionForm 

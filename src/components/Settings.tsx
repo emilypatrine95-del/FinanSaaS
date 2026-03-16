@@ -12,14 +12,37 @@ interface SettingsProps {
 export function Settings({ userProfile }: SettingsProps) {
   const [activeSection, setActiveSection] = React.useState<'profile' | 'notifications' | 'security'>('profile');
   const [fullName, setFullName] = React.useState(userProfile?.fullName || '');
+  const [photoURL, setPhotoURL] = React.useState(userProfile?.photoURL || '');
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
   const [saveMessage, setSaveMessage] = React.useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (userProfile) {
       setFullName(userProfile.fullName);
+      setPhotoURL(userProfile.photoURL || '');
     }
   }, [userProfile]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 1MB for base64 storage in Firestore)
+    if (file.size > 1024 * 1024) {
+      setSaveMessage({ type: 'error', text: 'A imagem deve ter menos de 1MB.' });
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoURL(reader.result as string);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSaveProfile = async () => {
     if (!userProfile) return;
@@ -30,6 +53,7 @@ export function Settings({ userProfile }: SettingsProps) {
       const userRef = doc(db, 'users', userProfile.id);
       await updateDoc(userRef, {
         fullName: fullName,
+        photoURL: photoURL,
         updatedAt: new Date().toISOString()
       });
       setSaveMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
@@ -155,9 +179,14 @@ export function Settings({ userProfile }: SettingsProps) {
           <div className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               <div className="md:col-span-1 flex flex-col items-center gap-4">
-                <div className="w-32 h-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-400 border-4 border-white shadow-xl overflow-hidden group relative">
-                  {userProfile?.photoURL ? (
-                    <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-32 h-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-400 border-4 border-white shadow-xl overflow-hidden group relative cursor-pointer"
+                >
+                  {isUploading ? (
+                    <Loader2 className="animate-spin text-emerald-600" size={32} />
+                  ) : photoURL ? (
+                    <img src={photoURL} alt="Profile" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                   ) : (
                     <User size={48} />
                   )}
@@ -165,7 +194,17 @@ export function Settings({ userProfile }: SettingsProps) {
                     <p className="text-white text-[10px] font-black uppercase tracking-widest">Alterar</p>
                   </div>
                 </div>
-                <button className="text-xs font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors">
+                <input 
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                >
                   Alterar Foto
                 </button>
               </div>
@@ -228,7 +267,7 @@ export function Settings({ userProfile }: SettingsProps) {
                   )}
                   <button 
                     onClick={handleSaveProfile}
-                    disabled={isSaving || fullName === userProfile?.fullName}
+                    disabled={isSaving || (fullName === userProfile?.fullName && photoURL === userProfile?.photoURL)}
                     className="w-full md:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-emerald-200"
                   >
                     {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}

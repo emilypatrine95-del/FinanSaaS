@@ -10,8 +10,8 @@ import {
   Tag,
   User
 } from 'lucide-react';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Transaction, Person } from '../types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -80,7 +80,7 @@ export function Transactions({ transactions, people }: TransactionsProps) {
       t.type === 'income' ? 'Entrada' : 'Saída'
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 40,

@@ -50,16 +50,8 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, onInstall, showInst
 
   return (
     <>
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-slate-200"
-      >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl lg:shadow-none",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl lg:shadow-none -translate-x-full",
       )}>
         <div className="flex flex-col h-full">
           <div className="p-8">
@@ -166,12 +158,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, onInstall, showInst
         </div>
       </div>
 
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 lg:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {/* Mobile overlay removed since we don't have a mobile sidebar anymore */}
     </>
   );
 }

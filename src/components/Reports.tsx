@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart3, TrendingUp, TrendingDown, PieChart, Download, FileText } from 'lucide-react';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Transaction } from '../types';
 import { 
   BarChart, 
@@ -84,7 +84,7 @@ export function Reports({ transactions }: ReportsProps) {
     doc.setFontSize(14);
     doc.text('Gastos por Categoria', 14, 90);
     
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [['Categoria', 'Valor Total']],
       body: categoryData.map(c => [c.name, new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c.value)]),
       startY: 95,
@@ -96,7 +96,7 @@ export function Reports({ transactions }: ReportsProps) {
     doc.setFontSize(14);
     doc.text('Comparativo Mensal', 14, (doc as any).lastAutoTable.finalY + 15);
     
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [['Mês', 'Entradas', 'Saídas', 'Resultado']],
       body: monthlyData.map(m => [
         m.name, 
