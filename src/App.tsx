@@ -107,21 +107,30 @@ export default function App() {
   };
 
   React.useEffect(() => {
+    let unsubProfile: (() => void) | undefined;
+
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
         const docRef = doc(db, 'users', u.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserProfile({ id: docSnap.id, ...docSnap.data() } as UserProfile);
-        }
+        unsubProfile = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setUserProfile({ id: docSnap.id, ...docSnap.data() } as UserProfile);
+          }
+        }, (error) => {
+          console.error("User profile snapshot error:", error);
+        });
       } else {
         setUserProfile(null);
+        if (unsubProfile) unsubProfile();
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubProfile) unsubProfile();
+    };
   }, []);
 
   React.useEffect(() => {

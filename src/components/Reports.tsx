@@ -28,7 +28,22 @@ export function Reports({ transactions }: ReportsProps) {
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
-  const categoryData = transactions
+  const filteredTransactions = React.useMemo(() => {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (period) {
+      case '1m': startDate = subMonths(now, 1); break;
+      case '3m': startDate = subMonths(now, 3); break;
+      case '6m': startDate = subMonths(now, 6); break;
+      case '1y': startDate = subMonths(now, 12); break;
+      default: startDate = subMonths(now, 6);
+    }
+
+    return transactions.filter(t => new Date(t.date) >= startDate);
+  }, [transactions, period]);
+
+  const categoryData = filteredTransactions
     .filter(t => t.type === 'expense')
     .reduce((acc: any[], t) => {
       const existing = acc.find(item => item.name === t.category);
@@ -41,17 +56,20 @@ export function Reports({ transactions }: ReportsProps) {
     }, [])
     .sort((a, b) => b.value - a.value);
 
-  const monthlyData = Array.from({ length: 6 }).map((_, i) => {
-    const date = subMonths(new Date(), 5 - i);
-    const mTransactions = transactions.filter(t => 
-      format(new Date(t.date), 'MM/yyyy') === format(date, 'MM/yyyy')
-    );
-    return {
-      name: format(date, 'MMM', { locale: ptBR }),
-      income: mTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0),
-      expense: mTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
-    };
-  });
+  const monthlyData = React.useMemo(() => {
+    const monthsCount = period === '1m' ? 1 : period === '3m' ? 3 : period === '6m' ? 6 : 12;
+    return Array.from({ length: monthsCount }).map((_, i) => {
+      const date = subMonths(new Date(), (monthsCount - 1) - i);
+      const mTransactions = transactions.filter(t => 
+        format(new Date(t.date), 'MM/yyyy') === format(date, 'MM/yyyy')
+      );
+      return {
+        name: format(date, 'MMM', { locale: ptBR }),
+        income: mTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0),
+        expense: mTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
+      };
+    });
+  }, [transactions, period]);
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
@@ -67,8 +85,8 @@ export function Reports({ transactions }: ReportsProps) {
     doc.text(`Data de geração: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 35);
 
     // Summary Section
-    const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+    const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+    const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
     const balance = totalIncome - totalExpense;
 
     doc.setFontSize(14);
@@ -150,43 +168,53 @@ export function Reports({ transactions }: ReportsProps) {
               Distribuição de Gastos
             </h3>
           </div>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RePieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={100}
-                  outerRadius={140}
-                  paddingAngle={8}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {categoryData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: '24px', 
-                    border: 'none', 
-                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                    padding: '16px 24px',
-                    fontWeight: '900',
-                    textTransform: 'uppercase',
-                    fontSize: '12px',
-                    letterSpacing: '1px'
-                  }}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  iconType="circle"
-                  formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">{value}</span>}
-                />
-              </RePieChart>
-            </ResponsiveContainer>
+          <div className="h-[400px] flex items-center justify-center">
+            {categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <RePieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={100}
+                    outerRadius={140}
+                    paddingAngle={8}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {categoryData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '24px', 
+                      border: 'none', 
+                      boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                      padding: '16px 24px',
+                      fontWeight: '900',
+                      textTransform: 'uppercase',
+                      fontSize: '12px',
+                      letterSpacing: '1px'
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    iconType="circle"
+                    formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">{value}</span>}
+                  />
+                </RePieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center">
+                <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
+                  <PieChart size={32} className="text-slate-300" />
+                </div>
+                <p className="text-slate-500 font-bold">Sem dados de gastos</p>
+                <p className="text-slate-400 text-sm">Adicione transações de saída para ver a distribuição.</p>
+              </div>
+            )}
           </div>
         </div>
 

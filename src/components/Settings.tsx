@@ -17,6 +17,7 @@ export function Settings({ userProfile }: SettingsProps) {
   const [isUploading, setIsUploading] = React.useState(false);
   const [saveMessage, setSaveMessage] = React.useState<{ type: 'success' | 'error', text: string } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (userProfile) {
@@ -194,19 +195,37 @@ export function Settings({ userProfile }: SettingsProps) {
                     <p className="text-white text-[10px] font-black uppercase tracking-widest">Alterar</p>
                   </div>
                 </div>
-                <input 
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-xs font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
-                >
-                  Alterar Foto
-                </button>
+                
+                <div className="flex flex-col gap-2 w-full">
+                  <input 
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <input 
+                    type="file"
+                    ref={cameraInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    capture="user"
+                    className="hidden"
+                  />
+                  
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors py-2 bg-emerald-50 rounded-xl"
+                  >
+                    Galeria
+                  </button>
+                  <button 
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors py-2 bg-blue-50 rounded-xl"
+                  >
+                    Tirar Foto
+                  </button>
+                </div>
               </div>
 
               <div className="md:col-span-2 space-y-6">
